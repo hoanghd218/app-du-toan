@@ -1,12 +1,12 @@
 import React from 'react';
 import { BasementDepth, FoundationType, HouseConfig, PackageType, RoofType } from '../types';
-import { 
-  BASEMENT_DEFAULT_PERCENTS, 
-  BASEMENT_LABELS, 
-  FOUNDATION_DEFAULT_PERCENTS, 
-  FOUNDATION_LABELS, 
-  PACKAGE_LABELS, 
-  ROOF_DEFAULT_PERCENTS, 
+import {
+  BASEMENT_DEFAULT_PERCENTS,
+  BASEMENT_LABELS,
+  FOUNDATION_DEFAULT_PERCENTS,
+  FOUNDATION_LABELS,
+  PACKAGE_LABELS,
+  ROOF_DEFAULT_PERCENTS,
   ROOF_LABELS,
   UNIT_PRICES
 } from '../constants';
@@ -17,7 +17,7 @@ interface InputFormProps {
 }
 
 const InputForm: React.FC<InputFormProps> = ({ config, onChange }) => {
-  
+
   const updateConfig = (updates: Partial<HouseConfig>) => {
     onChange({ ...config, ...updates });
   };
@@ -63,13 +63,19 @@ const InputForm: React.FC<InputFormProps> = ({ config, onChange }) => {
 
   const handlePackageChange = (type: PackageType) => {
     updateConfig({
-        packageType: type,
-        unitPrice: UNIT_PRICES[type] // Reset price to package default
+      packageType: type,
+      unitPrice: config.packagePrices[type] // Use stored price for this package
     });
   };
 
   const handlePriceChange = (value: number) => {
-      updateConfig({ unitPrice: value });
+    updateConfig({
+      unitPrice: value,
+      packagePrices: {
+        ...config.packagePrices,
+        [config.packageType]: value
+      }
+    });
   };
 
   return (
@@ -113,7 +119,7 @@ const InputForm: React.FC<InputFormProps> = ({ config, onChange }) => {
             <span className="text-xs text-blue-600 font-semibold cursor-help" title="Hệ số sàn mặc định 100%">Hệ số: {config.coefficients.floors}%</span>
           </label>
           <div className="flex items-center space-x-4">
-             <input
+            <input
               type="range"
               min="1"
               max="10"
@@ -139,89 +145,89 @@ const InputForm: React.FC<InputFormProps> = ({ config, onChange }) => {
               ))}
             </select>
             <div className="relative w-24">
-               <input 
-                  type="number" 
-                  value={config.coefficients.foundation}
-                  onChange={(e) => handleCoefficientChange('foundation', parseFloat(e.target.value))}
-                  className="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold text-slate-700"
-               />
-               <span className="absolute right-2 top-2 text-slate-400 text-sm">%</span>
+              <input
+                type="number"
+                value={config.coefficients.foundation}
+                onChange={(e) => handleCoefficientChange('foundation', parseFloat(e.target.value))}
+                className="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold text-slate-700"
+              />
+              <span className="absolute right-2 top-2 text-slate-400 text-sm">%</span>
             </div>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-             Gợi ý: Đơn (30-40%), Cọc (40-50%), Băng (50-70%)
+            Gợi ý: Đơn (30-40%), Cọc (40-50%), Băng (50-70%)
           </p>
         </div>
 
         {/* Basement */}
         <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="inline-flex items-center cursor-pointer">
+          <div className="flex items-center justify-between mb-2">
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.hasBasement}
+                onChange={(e) => updateConfig({ hasBasement: e.target.checked })}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700">Tầng Hầm</span>
+            </label>
+          </div>
+
+          {config.hasBasement && (
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 mt-2 space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Độ sâu hầm</label>
+                <select
+                  value={config.basementDepth}
+                  onChange={(e) => handleBasementDepthChange(e.target.value as BasementDepth)}
+                  className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-1 focus:ring-blue-500 outline-none"
+                >
+                  {Object.entries(BASEMENT_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Hệ số tính (%)</label>
                 <input
-                  type="checkbox"
-                  checked={config.hasBasement}
-                  onChange={(e) => updateConfig({ hasBasement: e.target.checked })}
-                  className="form-checkbox h-5 w-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                  type="number"
+                  value={config.coefficients.basement}
+                  onChange={(e) => handleCoefficientChange('basement', parseFloat(e.target.value))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm font-semibold"
                 />
-                <span className="ml-2 text-sm font-medium text-slate-700">Tầng Hầm</span>
-              </label>
+              </div>
             </div>
-            
-            {config.hasBasement && (
-               <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 mt-2 space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Độ sâu hầm</label>
-                    <select
-                      value={config.basementDepth}
-                      onChange={(e) => handleBasementDepthChange(e.target.value as BasementDepth)}
-                      className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:ring-1 focus:ring-blue-500 outline-none"
-                    >
-                      {Object.entries(BASEMENT_LABELS).map(([key, label]) => (
-                        <option key={key} value={key}>{label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Hệ số tính (%)</label>
-                    <input 
-                      type="number" 
-                      value={config.coefficients.basement}
-                      onChange={(e) => handleCoefficientChange('basement', parseFloat(e.target.value))}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-1 focus:ring-blue-500 text-sm font-semibold"
-                    />
-                  </div>
-               </div>
-            )}
+          )}
         </div>
 
         {/* Terrace */}
         <div>
-            <div className="flex items-center justify-between mb-2">
-               <label className="inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.hasTerrace}
-                  onChange={(e) => updateConfig({ hasTerrace: e.target.checked })}
-                  className="form-checkbox h-5 w-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                />
-                <span className="ml-2 text-sm font-medium text-slate-700">Sân Thượng</span>
-              </label>
-              
-              {config.hasTerrace && (
-                <div className="relative w-24">
-                   <input 
-                      type="number" 
-                      value={config.coefficients.terrace}
-                      onChange={(e) => handleCoefficientChange('terrace', parseFloat(e.target.value))}
-                      className="w-full px-2 py-1 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold text-sm"
-                   />
-                   <span className="absolute right-2 top-1 text-slate-400 text-xs">%</span>
-                </div>
-              )}
-            </div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.hasTerrace}
+                onChange={(e) => updateConfig({ hasTerrace: e.target.checked })}
+                className="form-checkbox h-5 w-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm font-medium text-slate-700">Sân Thượng</span>
+            </label>
+
             {config.hasTerrace && (
-                <p className="text-xs text-slate-500 pl-7">Gợi ý: 40-50%, có giàn: 60-70%</p>
+              <div className="relative w-24">
+                <input
+                  type="number"
+                  value={config.coefficients.terrace}
+                  onChange={(e) => handleCoefficientChange('terrace', parseFloat(e.target.value))}
+                  className="w-full px-2 py-1 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold text-sm"
+                />
+                <span className="absolute right-2 top-1 text-slate-400 text-xs">%</span>
+              </div>
             )}
+          </div>
+          {config.hasTerrace && (
+            <p className="text-xs text-slate-500 pl-7">Gợi ý: 40-50%, có giàn: 60-70%</p>
+          )}
         </div>
 
         {/* Roof */}
@@ -238,43 +244,42 @@ const InputForm: React.FC<InputFormProps> = ({ config, onChange }) => {
               ))}
             </select>
             <div className="relative w-24">
-               <input 
-                  type="number" 
-                  value={config.coefficients.roof}
-                  onChange={(e) => handleCoefficientChange('roof', parseFloat(e.target.value))}
-                  className="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold text-slate-700"
-               />
-               <span className="absolute right-2 top-2 text-slate-400 text-sm">%</span>
+              <input
+                type="number"
+                value={config.coefficients.roof}
+                onChange={(e) => handleCoefficientChange('roof', parseFloat(e.target.value))}
+                className="w-full px-2 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-center font-semibold text-slate-700"
+              />
+              <span className="absolute right-2 top-2 text-slate-400 text-sm">%</span>
             </div>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-             Gợi ý: Tole (30%), BTCT (50%), Kèo sắt (70%), Ngói (100%)
+            Gợi ý: Tole (30%), BTCT (50%), Kèo sắt (70%), Ngói (100%)
           </p>
         </div>
 
         {/* Package Selection */}
         <div className="pt-4 border-t border-slate-100">
-           <div className="flex justify-between items-end mb-3">
-               <label className="block text-sm font-bold text-slate-800">Gói Thầu Xây Dựng</label>
-               <div className="text-right w-1/2">
-                    <label className="text-xs text-slate-500 mb-1 block">Đơn giá áp dụng (VNĐ/m²)</label>
-                    <input 
-                        type="number"
-                        value={config.unitPrice}
-                        onChange={(e) => handlePriceChange(parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-1.5 border border-blue-300 rounded bg-blue-50 text-right font-bold text-blue-800 focus:ring-2 focus:ring-blue-500 outline-none"
-                    />
-               </div>
-           </div>
+          <div className="flex justify-between items-end mb-3">
+            <label className="block text-sm font-bold text-slate-800">Gói Thầu Xây Dựng</label>
+            <div className="text-right w-1/2">
+              <label className="text-xs text-slate-500 mb-1 block">Đơn giá áp dụng (VNĐ/m²)</label>
+              <input
+                type="number"
+                value={config.unitPrice}
+                onChange={(e) => handlePriceChange(parseFloat(e.target.value) || 0)}
+                className="w-full px-3 py-1.5 border border-blue-300 rounded bg-blue-50 text-right font-bold text-blue-800 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-2">
             {Object.entries(PACKAGE_LABELS).map(([key, label]) => (
-              <label 
-                key={key} 
-                className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${
-                  config.packageType === key 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' 
+              <label
+                key={key}
+                className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all ${config.packageType === key
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500'
                     : 'border-slate-200 hover:bg-slate-50'
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -284,7 +289,11 @@ const InputForm: React.FC<InputFormProps> = ({ config, onChange }) => {
                   onChange={() => handlePackageChange(key as PackageType)}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                 />
-                <span className="ml-3 text-sm font-medium">{label}</span>
+                <span className="ml-3 text-sm font-medium">
+                  {label} <span className="text-slate-500 font-normal">
+                    ({(config.packagePrices[key as PackageType] / 1000000).toLocaleString('vi-VN', { maximumFractionDigits: 2 })}tr/m²)
+                  </span>
+                </span>
               </label>
             ))}
           </div>
