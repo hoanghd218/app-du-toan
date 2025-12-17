@@ -10,7 +10,7 @@ export enum RoofType {
   TILE_TRUSS = 'TILE_TRUSS', // Mái ngói kèo sắt
   TILE_CONCRETE = 'TILE_CONCRETE', // Mái ngói BTCT
   CORRUGATED_IRON = 'CORRUGATED_IRON', // Mái tôn
-  NONE = 'NONE' 
+  NONE = 'NONE'
 }
 
 export enum BasementDepth {
@@ -21,16 +21,16 @@ export enum BasementDepth {
 }
 
 export enum PackageType {
-  ROUGH = 'ROUGH', 
-  FULL_AVERAGE = 'FULL_AVERAGE', 
-  FULL_GOOD = 'FULL_GOOD', 
-  FULL_PREMIUM = 'FULL_PREMIUM' 
+  ROUGH = 'ROUGH',
+  FULL_AVERAGE = 'FULL_AVERAGE',
+  FULL_GOOD = 'FULL_GOOD',
+  FULL_PREMIUM = 'FULL_PREMIUM'
 }
 
 export interface HouseConfig {
   width: number;
   length: number;
-  floors: number; 
+  floors: number;
   foundationType: FoundationType;
   roofType: RoofType;
   hasBasement: boolean;
@@ -38,7 +38,7 @@ export interface HouseConfig {
   hasTerrace: boolean;
   packageType: PackageType;
   unitPrice: number; // New: Manually editable unit price
-  
+
   // New: Custom coefficients settings (percent as integer, e.g. 40 for 40%)
   coefficients: {
     foundation: number;
@@ -47,7 +47,9 @@ export interface HouseConfig {
     roof: number;
     terrace: number;
   };
+  packagePrices: Record<PackageType, number>; // New: Store custom prices for each package
 }
+
 
 export interface CostBreakdownItem {
   name: string;
